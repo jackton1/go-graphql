@@ -198,5 +198,9 @@ func main() {
 		})
 		json.NewEncoder(w).Encode(result)
 	})
-	http.ListenAndServe(":12345", nil)
+	err = http.ListenAndServe(":12345", nil)
+
+	if err != nil {
+		log.Fatalf("Error running server, error: %v", err)
+	}
 }
