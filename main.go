@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/graphql-go/graphql"
 )
@@ -132,18 +134,36 @@ func main() {
 			"songs": &graphql.Field{
 				Type: graphql.NewList(songType),
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+					// Simulate long running query.
+					fmt.Printf("Current Unix Time: %v\n", time.Now().Unix())
+
+					time.Sleep(1 * time.Minute)
+
+					fmt.Printf("Current Unix Time: %v\n", time.Now().Unix())
 					return songs, nil
 				},
 			},
 			"albums": &graphql.Field{
 				Type: graphql.NewList(albumType),
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+					// Simulate long running query.
+					fmt.Printf("Current Unix Time: %v\n", time.Now())
+
+					time.Sleep(1 * time.Minute)
+
+					fmt.Printf("Current Unix Time: %v\n", time.Now())
 					return albums, nil
 				},
 			},
 			"artists": &graphql.Field{
 				Type: graphql.NewList(artistType),
 				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+					// Simulate long running query.
+					fmt.Printf("Current Unix Time: %v\n", time.Now().Unix())
+
+					time.Sleep(1 * time.Minute)
+
+					fmt.Printf("Current Unix Time: %v\n", time.Now().Unix())
 					return artists, nil
 				},
 			},
@@ -192,11 +212,16 @@ func main() {
 	}
 
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("URL: %s", r.URL)
+		log.Printf("Query: %s", r.URL.Query())
 		result := graphql.Do(graphql.Params{
 			Schema:        schema,
 			RequestString: r.URL.Query().Get("query"),
 		})
-		json.NewEncoder(w).Encode(result)
+		err = json.NewEncoder(w).Encode(result)
+		if err != nil {
+			log.Fatalf("Error encoding result, error: %v", err)
+		}
 	})
 	err = http.ListenAndServe(":12345", nil)
 
